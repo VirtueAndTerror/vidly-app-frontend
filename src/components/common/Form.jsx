@@ -3,6 +3,7 @@ import Joi from 'joi-browser';
 import Input from './Input';
 import Select from './Select';
 
+// Here the render helper methods and validation logic
 class Form extends Component {
   state = {
     data: {},
@@ -16,21 +17,26 @@ class Form extends Component {
     if (!error) return null;
 
     const errors = {};
+
     for (let item of error.details) {
       errors[item.path[0]] = item.message;
-      return errors;
     }
+    return errors;
   };
 
   validateProperty = ({ name, value }) => {
+    // If the name is 'username' then the key of the object is 'username'...
     const obj = { [name]: value };
     const schema = { [name]: this.schema[name] };
+    // We validate the new custom object.
+    // Since we want to abort early, we don't pass the 3rd argument to Joi.validate().
     const { error } = Joi.validate(obj, schema);
 
     return error ? error.details[0].message : null;
   };
 
   handleSubmit = e => {
+    // Prevents the for to make a full app re-render
     e.preventDefault();
 
     const errors = this.validate();

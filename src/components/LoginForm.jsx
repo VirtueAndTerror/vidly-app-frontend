@@ -9,17 +9,13 @@ class LoginForm extends Form {
 
     this.state = {
       data: { username: '', password: '' },
-      errors: {}
+      errors: {},
     };
   }
 
   schema = {
-    username: Joi.string()
-      .required()
-      .label('Username'),
-    password: Joi.string()
-      .required()
-      .label('Password')
+    username: Joi.string().required().label('Username'),
+    password: Joi.string().required().label('Password'),
   };
 
   doSubmit = async () => {
@@ -39,7 +35,7 @@ class LoginForm extends Form {
   };
 
   render() {
-    if (auth.getCurrentUser()) return <Redirect to='/' />; //Redirect component does NOT RE-MOUNTS  the page.
+    if (auth.getCurrentUser()) return <Redirect to='/' />; //Redirect component does NOT RE-MOUNTS the page.
     return (
       <div>
         <form onSubmit={this.handleSubmit}>

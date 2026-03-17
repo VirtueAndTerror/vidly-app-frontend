@@ -1,5 +1,5 @@
-import React from 'react';
 import Joi from 'joi';
+import { useParams, useNavigate } from 'react-router-dom';
 import Form from './common/Form';
 import { saveMovie, getMovie } from '../services/movieService';
 import { getGenres } from '../services/genreService';
@@ -91,4 +91,17 @@ class MoviesForm extends Form {
   }
 }
 
-export default MoviesForm;
+// Wrapper injects v6 hooks as props the class component already expects
+function MoviesFormWrapper(props) {
+  const params = useParams();
+  const navigate = useNavigate();
+  return (
+    <MoviesForm
+      {...props}
+      match={{ params }}
+      history={{ push: navigate, replace: navigate }}
+    />
+  );
+}
+
+export default MoviesFormWrapper;

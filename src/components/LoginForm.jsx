@@ -1,8 +1,8 @@
-import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import auth from '../services/authService';
 import Joi from 'joi';
 import Form from './common/Form';
+
 class LoginForm extends Form {
   constructor() {
     super();
@@ -48,4 +48,12 @@ class LoginForm extends Form {
   }
 }
 
-export default LoginForm;
+function LoginFormWrapper(props) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  return (
+    <LoginForm {...props} location={location} history={{ push: navigate }} />
+  );
+}
+
+export default LoginFormWrapper;

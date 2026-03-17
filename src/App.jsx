@@ -1,62 +1,54 @@
-import React, { Component } from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
-import ProtectedRoute from './components/common/ProtectedRoute';
+import { useEffect, useState } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
-import Movies from './components/Movies';
-import Navbar from './components/Navbar';
 import Customers from './components/Customers';
-import Rentals from './components/Rentals';
-import NotFound from './components/NotFound';
-import MoviesForm from './components/MoviesForm';
 import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm';
 import Logout from './components/Logout';
+import Movies from './components/Movies';
+import MoviesForm from './components/MoviesForm';
+import Navbar from './components/Navbar';
+import NotFound from './components/NotFound';
+import RegisterForm from './components/RegisterForm';
+import Rentals from './components/Rentals';
 
 import auth from './services/authService';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
-class App extends Component {
-	state = {};
+const App = () => {
+  const [user, setUser] = useState(null);
 
-	componentDidMount() {
-		const user = auth.getCurrentUser();
-		this.setState({ user });
-	}
+  useEffect(() => {
+    const user = auth.getCurrentUser();
+    setUser(user);
+  }, []);
 
-	// componentWillUnmount() {
-
-	// }
-
-	render() {
-		const { user } = this.state;
-
-		return (
-			<React.Fragment>
-				<ToastContainer />
-				<Navbar user={user} />
-				<main className='container'>
-					<Switch>
-						<Route path='/login' component={LoginForm} />
-						<Route path='/logout' component={Logout} />
-						<Route path='/register' component={RegisterForm} />
-						<ProtectedRoute path='/movies/:id' component={MoviesForm} />
-						<Route
-							path='/movies'
-							render={props => <Movies {...props} user={user} />}
-						/>
-						<Route path='/customers' component={Customers} />
-						<Route path='/rentals' component={Rentals} />
-						<Route path='/not-found' component={NotFound} />
-						<Redirect exact from='/' to='/movies' />
-						<Redirect to='/not-found' />
-					</Switch>
-				</main>
-			</React.Fragment>
-		);
-	}
-}
+  return (
+    <>
+      <ToastContainer />
+      <Navbar user={user} />
+      <main className='container'>
+        <Routes>
+          <Route path='/login' element={<LoginForm />} />
+          <Route path='/logout' element={<Logout />} />
+          <Route path='/register' element={<RegisterForm />} />
+          <Route
+            path='/movies/:id'
+            element={<ProtectedRoute component={MoviesForm} />}
+          />
+          <Route path='/movies' element={<Movies user={user} />} />
+          <Route path='/customers' element={<Customers />} />
+          <Route path='/rentals' element={<Rentals />} />
+          <Route path='/not-found' element={<NotFound />} />
+          <Route path='/' element={<Navigate to={'/movies'} />} />
+          <Route path='*' element={<Navigate to={'/not-found'} />} />
+        </Routes>
+      </main>
+    </>
+  );
+};
 
 export default App;

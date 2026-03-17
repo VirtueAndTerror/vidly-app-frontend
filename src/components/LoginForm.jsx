@@ -1,7 +1,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import auth from '../services/authService';
-import Joi from 'joi-browser';
+import Joi from 'joi';
 import Form from './common/Form';
 class LoginForm extends Form {
   constructor() {
@@ -35,7 +35,7 @@ class LoginForm extends Form {
   };
 
   render() {
-    if (auth.getCurrentUser()) return <Redirect to='/' />; //Redirect component does NOT RE-MOUNTS the page.
+    if (auth.getCurrentUser()) return <Redirect to='/' />;
     return (
       <div>
         <form onSubmit={this.handleSubmit}>

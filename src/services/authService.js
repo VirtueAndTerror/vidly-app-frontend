@@ -1,5 +1,5 @@
 import http from './httpSevice';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const apiEndpoint = '/auth';
 const tokenKey = 'token';
@@ -25,7 +25,7 @@ const auth = {
   },
   getJwt() {
     return localStorage.getItem(tokenKey);
-  }
+  },
 };
 
 http.setJwt(auth.getJwt());

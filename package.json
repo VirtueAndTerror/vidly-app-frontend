@@ -13,21 +13,20 @@
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
     "font-awesome": "^4.7.0",
-    "joi-browser": "^13.4.0",
-    "jwt-decode": "^2.2.0",
+    "joi": "^18.0.2",
+    "jwt-decode": "^4.0.0",
     "lodash": "^4.17.15",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "^3.4.1",
     "react-toastify": "^5.5.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -43,5 +42,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.0"
   }
 }

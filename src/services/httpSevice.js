@@ -2,13 +2,13 @@ import axios from 'axios';
 import logger from './logger';
 import { toast } from 'react-toastify';
 
-axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 axios.interceptors.response.use(
-  success => {
+  (success) => {
     return Promise.resolve(success);
   },
-  error => {
+  (error) => {
     const expectedError =
       error.response &&
       error.response.status >= 400 &&
@@ -20,7 +20,7 @@ axios.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 function setJwt(jwt) {
@@ -32,5 +32,5 @@ export default {
   post: axios.post,
   put: axios.put,
   delete: axios.delete,
-  setJwt
+  setJwt,
 };

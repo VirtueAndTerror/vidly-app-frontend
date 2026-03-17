@@ -1,5 +1,5 @@
 import React from 'react';
-import Joi from 'joi-browser';
+import Joi from 'joi';
 import Form from './common/Form';
 import * as userService from '../services/userService';
 import auth from '../services/authService';
@@ -10,22 +10,14 @@ class RegisterForm extends Form {
 
     this.state = {
       data: { username: '', password: '', name: '' },
-      errors: {}
+      errors: {},
     };
   }
 
   schema = {
-    username: Joi.string()
-      .email()
-      .required()
-      .label('Username'),
-    password: Joi.string()
-      .min(5)
-      .required()
-      .label('Password'),
-    name: Joi.string()
-      .required()
-      .label('Name')
+    username: Joi.string().email().required().label('Username'),
+    password: Joi.string().min(5).required().label('Password'),
+    name: Joi.string().required().label('Name'),
   };
 
   doSubmit = async () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import Joi from 'joi-browser';
+import Joi from 'joi';
 import Form from './common/Form';
 import { saveMovie, getMovie } from '../services/movieService';
 import { getGenres } from '../services/genreService';
@@ -13,20 +13,16 @@ class MoviesForm extends Form {
         title: '',
         genreId: '',
         numberInStock: '',
-        dailyRantalRate: ''
+        dailyRentalRate: '',
       },
       genres: [],
-      errors: {}
+      errors: {},
     };
   }
 
   schema = {
-    title: Joi.string()
-      .required()
-      .label('Title'),
-    genreId: Joi.string()
-      .required()
-      .label('Genre'),
+    title: Joi.string().required().label('Title'),
+    genreId: Joi.string().required().label('Genre'),
     numberInStock: Joi.number()
       .integer()
       .min(0)
@@ -37,7 +33,7 @@ class MoviesForm extends Form {
       .required()
       .min(0)
       .max(10)
-      .label('Daily Rental Rate')
+      .label('Daily Rental Rate'),
   };
 
   async populateGenres() {
@@ -69,7 +65,7 @@ class MoviesForm extends Form {
       title: movie.title,
       genreId: movie.genre._id,
       numberInStock: movie.numberInStock,
-      dailyRentalRate: movie.dailyRentalRate
+      dailyRentalRate: movie.dailyRentalRate,
     };
   }
 

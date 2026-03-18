@@ -23,14 +23,23 @@ axios.interceptors.response.use(
   },
 );
 
-function setJwt(jwt) {
-  axios.defaults.headers.common['x-auth-token'] = jwt;
+function setJwt(jwt: string | null): void {
+  axios.defaults.headers.common['x-auth-token'] = jwt ?? '';
 }
 
+// Wrapper functions preserve generics
 export default {
-  get: axios.get,
-  post: axios.post,
-  put: axios.put,
-  delete: axios.delete,
+  get<T>(url: string, config?: object) {
+    return axios.get<T>(url, config);
+  },
+  post<T>(url: string, data?: object, config?: object) {
+    return axios.post<T>(url, data, config);
+  },
+  put<T>(url: string, data?: object, config?: object) {
+    return axios.put<T>(url, data, config);
+  },
+  delete<T>(url: string, config?: object) {
+    return axios.delete<T>(url, config);
+  },
   setJwt,
 };

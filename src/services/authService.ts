@@ -1,29 +1,34 @@
 import http from './httpSevice';
 import { jwtDecode } from 'jwt-decode';
+import { User } from '../types';
 
 const apiEndpoint = '/auth';
 const tokenKey = 'token';
 
 const auth = {
-  async login(email, password) {
-    const { data: jwt } = await http.post(apiEndpoint, { email, password });
+  async login(email: string, password: string): Promise<void> {
+    const { data: jwt } = await http.post<string>(apiEndpoint, {
+      email,
+      password,
+    });
     localStorage.setItem(tokenKey, jwt);
   },
-  loginWithJwt(jwt) {
+  loginWithJwt(jwt: string): void {
     localStorage.setItem(tokenKey, jwt);
   },
-  logout() {
+  logout(): void {
     localStorage.removeItem(tokenKey);
   },
-  getCurrentUser() {
+  getCurrentUser(): User | null {
     try {
       const jwt = localStorage.getItem(tokenKey);
-      return jwtDecode(jwt);
+      if (!jwt) return null;
+      return jwtDecode<User>(jwt);
     } catch (ex) {
       return null;
     }
   },
-  getJwt() {
+  getJwt(): string | null {
     return localStorage.getItem(tokenKey);
   },
 };

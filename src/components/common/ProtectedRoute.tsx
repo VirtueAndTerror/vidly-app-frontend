@@ -1,7 +1,11 @@
 import { Navigate } from 'react-router-dom';
 import auth from '../../services/authService';
 
-const ProtectedRoute = ({ component: Component }) => {
+interface Props {
+  component: React.ComponentType<any>;
+}
+
+const ProtectedRoute = ({ component: Component }: Props) => {
   return auth.getCurrentUser() ? (
     <Component />
   ) : (

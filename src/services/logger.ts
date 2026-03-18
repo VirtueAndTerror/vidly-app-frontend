@@ -6,12 +6,12 @@
 //   });
 // }
 
-function log(error) {
+function log(error: unknown): void {
   console.error(error);
   // Sentry.captureException(error);
 }
 
 export default {
   // init,
-  log
+  log,
 };

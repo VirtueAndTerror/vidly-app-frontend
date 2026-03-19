@@ -1,7 +1,12 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
+import { User } from '../types';
 
-const Navbar = ({ user }) => {
+interface Props {
+  user: User | null;
+}
+
+const Navbar = ({ user }: Props) => {
   return (
     <nav className='navbar navbar-expand-lg navbar-light bg-light px-5'>
       <Link className='navbar-brand' to='/'>

@@ -1,11 +1,25 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import auth from '../services/authService';
 import Joi from 'joi';
-import Form from './common/Form';
+import Form, { FormState } from './common/Form';
+import axios from 'axios';
 
-class LoginForm extends Form {
-  constructor() {
-    super();
+interface FormData {
+  username: string;
+  password: string;
+}
+
+interface InjectedProps {
+  location: {state?: {from?: {pathname?: string}}};
+  history: {
+    push: (path: string) => void;
+    
+  };
+}
+
+class LoginForm extends Form<FormData, FormState<FormData>> {
+  constructor(props: InjectedProps) {
+    super(props);
 
     this.state = {
       data: { username: '', password: '' },
@@ -13,20 +27,20 @@ class LoginForm extends Form {
     };
   }
 
-  schema = {
+  schema: Record<string, Joi.Schema> = {
     username: Joi.string().required().label('Username'),
     password: Joi.string().required().label('Password'),
   };
 
-  doSubmit = async () => {
+  doSubmit = async (): Promise<void> => {
     try {
       const { username, password } = this.state.data;
       await auth.login(username, password);
 
       const { state } = this.props.location;
       window.location = state ? state.from.pathname : '/';
-    } catch (err) {
-      if (err.response && err.response.status === 400) {
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response && err.response.status === 400) {
         const errors = { ...this.state.errors };
         errors.username = err.response.data;
         this.setState({ errors });
@@ -35,7 +49,7 @@ class LoginForm extends Form {
   };
 
   render() {
-    if (auth.getCurrentUser()) return <Redirect to='/' />;
+    if (auth.getCurrentUser()) return <Navigate to='/' />;
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
@@ -48,7 +62,7 @@ class LoginForm extends Form {
   }
 }
 
-function LoginFormWrapper(props) {
+function LoginFormWrapper(props:object) {
   const location = useLocation();
   const navigate = useNavigate();
   return (

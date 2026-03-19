@@ -7,18 +7,18 @@ import { Genre } from '../../types';
 // Here the render helper methods and validation logic
 // T is the shape of the form data object e.g. {title, genreId, ...}
 
-interface FormState<T> {
+export interface FormState<T> {
   data: T;
   errors: Record<string, string>;
 }
-abstract class Form<T extends Record<string, any>> extends Component<
-  any,
-  FormState<T>
-> {
-  state: FormState<T> = {
+abstract class Form<
+  T extends Record<string, any>,
+  S extends FormState<T>,
+> extends Component<any, S> {
+  state: S = {
     data: {} as T,
     errors: {},
-  };
+  } as S;
 
   // Subclasses must define both of these
   abstract schema: Record<string, Joi.Schema>;
@@ -92,7 +92,7 @@ abstract class Form<T extends Record<string, any>> extends Component<
     return (
       <Select
         name={name}
-        value={(data as any)[name]}
+        value={data[name]}
         label={label}
         options={options}
         onChange={this.handleChange as any}

@@ -1,26 +1,48 @@
 import Joi from 'joi';
 import { useParams, useNavigate } from 'react-router-dom';
-import Form from './common/Form';
+import Form, { FormState } from './common/Form';
 import { saveMovie, getMovie } from '../services/movieService';
 import { getGenres } from '../services/genreService';
+import { Genre, Movie } from '../types';
+import axios from 'axios';
 
-class MoviesForm extends Form {
-  constructor() {
-    super();
+// Shape of this form's data fields
+interface FormData {
+  _id?: string;
+  title: string;
+  genreId: string;
+  numberInStock: string;
+  dailyRentalRate: string;
+}
 
-    this.state = {
-      data: {
-        title: '',
-        genreId: '',
-        numberInStock: '',
-        dailyRentalRate: '',
-      },
-      genres: [],
-      errors: {},
-    };
+interface MoviesFormState extends FormState<FormData> {
+  genres: Genre[];
+}
+// Props injected by the wrapper
+interface InjectedProps {
+  match: { params: Record<string, string | undefined> };
+  history: {
+    push: (path: string) => void;
+    replace: (path: string) => void;
+  };
+}
+
+class MoviesForm extends Form<FormData, MoviesFormState> {
+  state: MoviesFormState = {
+    data: {
+      title: '',
+      genreId: '',
+      numberInStock: '',
+      dailyRentalRate: '',
+    },
+    genres: [] as Genre[],
+    errors: {},
+  };
+  constructor(props: InjectedProps) {
+    super(props);
   }
 
-  schema = {
+  schema: Record<string, Joi.Schema> = {
     title: Joi.string().required().label('Title'),
     genreId: Joi.string().required().label('Genre'),
     numberInStock: Joi.number()
@@ -43,13 +65,13 @@ class MoviesForm extends Form {
 
   async populateMovie() {
     try {
-      const movieId = this.props.match.params.id;
+      const movieId = this.props.match.params.id || '';
       if (movieId === 'new') return;
 
       const { data: movie } = await getMovie(movieId);
       this.setState({ data: this.mapToViewModel(movie) });
-    } catch (err) {
-      if (err.response && err.response.status === 404)
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response && err.response.status === 404)
         this.props.history.replace('/not-found');
     }
   }
@@ -59,19 +81,24 @@ class MoviesForm extends Form {
     await this.populateMovie();
   }
 
-  mapToViewModel(movie) {
+  mapToViewModel(movie: Movie): FormData {
     return {
       _id: movie._id,
       title: movie.title,
       genreId: movie.genre._id,
-      numberInStock: movie.numberInStock,
-      dailyRentalRate: movie.dailyRentalRate,
+      numberInStock: movie.numberInStock.toString(),
+      dailyRentalRate: movie.dailyRentalRate.toString(),
     };
   }
 
-  doSubmit = async () => {
+  doSubmit = async (): Promise<void> => {
     //Call the server
-    await saveMovie(this.state.data);
+    const { data } = this.state;
+    await saveMovie({
+      ...data,
+      numberInStock: Number(data.numberInStock),
+      dailyRentalRate: Number(data.dailyRentalRate),
+    }as any);
     this.props.history.push('/movies');
   };
 
@@ -92,7 +119,7 @@ class MoviesForm extends Form {
 }
 
 // Wrapper injects v6 hooks as props the class component already expects
-function MoviesFormWrapper(props) {
+function MoviesFormWrapper(props: object) {
   const params = useParams();
   const navigate = useNavigate();
   return (

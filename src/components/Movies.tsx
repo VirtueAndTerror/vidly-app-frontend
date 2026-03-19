@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import MoviesTable from './MoviesTable';
@@ -9,16 +9,31 @@ import { getMovies, deleteMovie } from '../services/movieService';
 import { getGenres } from '../services/genreService';
 import { paginate } from '../utils/paginate';
 import _ from 'lodash';
+import type { Movie, User, Genre, SortColumn } from '../types';
 
-class Movies extends Component {
-  state = {
+interface Props {
+  user: User | null;
+}
+
+interface State {
+  movies: Movie[];
+  genres: Genre[];
+  pageSize: number;
+  currentPage: number;
+  searchQuery: string;
+  selectedGenre: Genre | null;
+  sortColumn: SortColumn;
+}
+
+class Movies extends Component<Props, State> {
+  state: State = {
     movies: [],
     genres: [],
     pageSize: 4,
     currentPage: 1,
     searchQuery: '',
     selectedGenre: null,
-    sortColumn: { path: 'title', order: 'asc' },
+    sortColumn: { path: 'title', order: 'asc' as const },
   };
 
   async componentDidMount() {
@@ -28,7 +43,7 @@ class Movies extends Component {
     this.setState({ movies, genres });
   }
 
-  handleDelete = async (movie) => {
+  handleDelete = async (movie: Movie) => {
     //  Optimistic Update ( we make the UI changes FIRST )
     const originalMovies = this.state.movies;
     const movies = originalMovies.filter((m) => m._id !== movie._id);
@@ -36,7 +51,7 @@ class Movies extends Component {
 
     try {
       await deleteMovie(movie._id);
-    } catch (err) {
+    } catch (err: any) {
       if (err.response && err.response.status === 404)
         toast.error('This movie has already been deleted');
 
@@ -44,7 +59,7 @@ class Movies extends Component {
     }
   };
 
-  handleLike = (movie) => {
+  handleLike = (movie: Movie) => {
     // Clone movies array of objects
     const movies = [...this.state.movies];
     // Get the index of the movie passed as an arguent
@@ -56,19 +71,19 @@ class Movies extends Component {
     this.setState({ movies });
   };
 
-  handlePageChange = (page) => {
+  handlePageChange = (page: number) => {
     this.setState({ currentPage: page });
   };
 
-  handleGenreSelect = (genre) => {
+  handleGenreSelect = (genre: Genre) => {
     this.setState({ selectedGenre: genre, searchQuery: '', currentPage: 1 });
   };
 
-  handleSearch = (query) => {
+  handleSearch = (query: string) => {
     this.setState({ searchQuery: query, selectedGenre: null, currentPage: 1 });
   };
 
-  handleSort = (sortColumn) => {
+  handleSort = (sortColumn: SortColumn) => {
     this.setState({ sortColumn });
   };
 

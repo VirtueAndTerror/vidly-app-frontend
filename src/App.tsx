@@ -17,9 +17,10 @@ import auth from './services/authService';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import type { User } from './types';
 
 const App = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const user = auth.getCurrentUser();

@@ -5,7 +5,7 @@ const Logout = () => {
   useEffect(() => {
     auth.logout();
     console.log('Logged out');
-    window.location = '/';
+    window.location.href = '/';
   }, []);
 
   return null;

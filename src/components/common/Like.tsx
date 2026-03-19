@@ -1,9 +1,13 @@
-import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
 
-const Like = ({ liked, onClick }) => {
+interface Props {
+  liked: boolean;
+  onClick: () => void;
+}
+
+const Like = ({ liked, onClick }: Props) => {
   const likedHeart = <FontAwesomeIcon icon={faHeart} />;
   const unlikedHeart = <FontAwesomeIcon icon={farHeart} />;
   return (

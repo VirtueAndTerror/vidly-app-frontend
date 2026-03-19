@@ -1,12 +1,17 @@
-import React from 'react';
 import Joi from 'joi';
-import Form from './common/Form';
+import Form, { FormState } from './common/Form';
 import * as userService from '../services/userService';
 import auth from '../services/authService';
 
-class RegisterForm extends Form {
-  constructor() {
-    super();
+interface FormData {
+  username: string;
+  password: string;
+  name: string;
+}
+
+class RegisterForm extends Form<FormData, FormState<FormData>> {
+  constructor(props: object) {
+    super(props);
 
     this.state = {
       data: { username: '', password: '', name: '' },
@@ -14,21 +19,23 @@ class RegisterForm extends Form {
     };
   }
 
-  schema = {
-    username: Joi.string().email().required().label('Username'),
+  schema: Record<string, Joi.Schema> = {
+    username: Joi.string()
+      .email({ tlds: { allow: false } })
+      .required()
+      .label('Username'),
     password: Joi.string().min(5).required().label('Password'),
     name: Joi.string().required().label('Name'),
   };
 
-  doSubmit = async () => {
-    //Call the server
+  doSubmit = async (): Promise<void> => {
     try {
       const res = await userService.register(this.state.data);
 
       auth.loginWithJwt(res.headers['x-auth-token']);
 
-      window.location = '/';
-    } catch (err) {
+      window.location.href = '/';
+    } catch (err: any) {
       if (err.response && err.response.status === 400) {
         const errors = { ...this.state.errors };
         errors.username = err.response.data;

@@ -1,6 +1,9 @@
-import React from 'react';
+interface Props {
+  value: string;
+  onChange: (query: string) => void;
+}
 
-const SearchBox = ({ value, onChange }) => {
+const SearchBox = ({ value, onChange }: Props) => {
   return (
     <input
       type='text'

@@ -1,15 +1,21 @@
-import React from 'react';
+interface Props {
+  items: any[];
+  textProperty?: string;
+  valueProperty?: string;
+  onItemSelect: (item: any) => void;
+  selectedItem: any;
+}
 
 const ListGroup = ({
   items,
-  textProperty,
-  valueProperty,
+  textProperty = 'name',
+  valueProperty = '_id',
   onItemSelect,
   selectedItem
-}) => {
+}: Props) => {
   return (
     <ul className='list-group'>
-      {items.map(item => (
+      {items.map((item) => (
         <li
           key={item[valueProperty]}
           className={
@@ -24,11 +30,6 @@ const ListGroup = ({
       ))}
     </ul>
   );
-};
-
-ListGroup.defaultProps = {
-  textProperty: 'name',
-  valueProperty: '_id'
 };
 
 export default ListGroup;

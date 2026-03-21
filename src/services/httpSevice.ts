@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import logger from './logger';
 import { toast } from 'react-toastify';
 
@@ -23,23 +23,27 @@ axios.interceptors.response.use(
   },
 );
 
-function setJwt(jwt: string | null): void {
-  axios.defaults.headers.common['x-auth-token'] = jwt ?? '';
+// Sigleton Pattern
+class HttpService {
+  get<T>(url: string, config?: AxiosRequestConfig) {
+    return axios.get<T>(url, config);
+  }
+
+  post<T>(url: string, data?: unknown, config?: AxiosRequestConfig) {
+    return axios.post<T>(url, data, config);
+  }
+
+  put<T>(url: string, data?: unknown, config?: AxiosRequestConfig) {
+    return axios.put<T>(url, data, config);
+  }
+
+  delete<T>(url: string, config?: AxiosRequestConfig) {
+    return axios.delete<T>(url, config);
+  }
+
+  setJwt(jwt: string | null) {
+    axios.defaults.headers.common['x-auth-token'] = jwt ?? '';
+  }
 }
 
-// Wrapper functions preserve generics
-export default {
-  get<T>(url: string, config?: object) {
-    return axios.get<T>(url, config);
-  },
-  post<T>(url: string, data?: object, config?: object) {
-    return axios.post<T>(url, data, config);
-  },
-  put<T>(url: string, data?: object, config?: object) {
-    return axios.put<T>(url, data, config);
-  },
-  delete<T>(url: string, config?: object) {
-    return axios.delete<T>(url, config);
-  },
-  setJwt,
-};
+export default new HttpService();

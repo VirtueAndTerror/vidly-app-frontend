@@ -1,15 +1,15 @@
+import _ from 'lodash';
 import { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import MoviesTable from './MoviesTable';
-import ListGroup from './common/ListGroup';
-import SearchBox from './SearchBox';
-import Pagination from './common/Pagination';
-import { getMovies, deleteMovie } from '../services/movieService';
 import { getGenres } from '../services/genreService';
+import { deleteMovie, getMovies } from '../services/movieService';
+import type { Genre, Movie, SortColumn, User } from '../types';
 import { paginate } from '../utils/paginate';
-import _ from 'lodash';
-import type { Movie, User, Genre, SortColumn } from '../types';
+import MoviesTable from './MoviesTable';
+import SearchBox from './SearchBox';
+import ListGroup from './common/ListGroup';
+import Pagination from './common/Pagination';
 
 interface Props {
   user: User | null;

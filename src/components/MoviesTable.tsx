@@ -1,4 +1,3 @@
-import { Component } from 'react';
 import auth from '../services/authService';
 import { Link } from 'react-router-dom';
 import Table from './common/Table';
@@ -13,8 +12,14 @@ interface Props {
   onDelete: (movie: Movie) => void;
 }
 
-class MoviesTable extends Component<Props> {
-  columns: Column<Movie>[] = [
+const MoviesTable = ({
+  movies,
+  sortColumn,
+  onSort,
+  onLike,
+  onDelete,
+}: Props) => {
+  const columns: Column<Movie>[] = [
     {
       path: 'title',
       label: 'Title',
@@ -28,39 +33,31 @@ class MoviesTable extends Component<Props> {
     {
       key: 'like',
       content: (movie) => (
-        <Like liked={Boolean(movie.liked)} onClick={() => this.props.onLike(movie)} />
+        <Like liked={Boolean(movie.liked)} onClick={() => onLike(movie)} />
       ),
     },
   ];
 
-  deleteColumn: Column<Movie> = {
+  const deleteColumn: Column<Movie> = {
     key: 'delete',
     content: (movie) => (
-      <button
-        onClick={() => this.props.onDelete(movie)}
-        className='btn btn-danger btn-sm'
-      >
+      <button onClick={() => onDelete(movie)} className='btn btn-danger btn-sm'>
         Delete
       </button>
     ),
   };
 
-  constructor(props: Props) {
-    super(props);
-    const user = auth.getCurrentUser();
-    if (user && user.isAdmin) this.columns.push(this.deleteColumn);
-  }
-  render() {
-    const { movies, onSort, sortColumn } = this.props;
-    return (
-      <Table
-        columns={this.columns}
-        data={movies}
-        sortColumn={sortColumn}
-        onSort={onSort}
-      />
-    );
-  }
-}
+  const user = auth.getCurrentUser();
+  if (user && user.isAdmin) columns.push(deleteColumn);
+
+  return (
+    <Table
+      columns={columns}
+      data={movies}
+      sortColumn={sortColumn}
+      onSort={onSort}
+    />
+  );
+};
 
 export default MoviesTable;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -20,12 +20,7 @@ import './App.css';
 import type { User } from './types';
 
 const App = () => {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const user = auth.getCurrentUser();
-    setUser(user);
-  }, []);
+  const [user, setUser] = useState<User | null>(auth.getCurrentUser());
 
   return (
     <>
@@ -33,7 +28,12 @@ const App = () => {
       <Navbar user={user} />
       <main className='container'>
         <Routes>
-          <Route path='/login' element={<LoginForm />} />
+          <Route
+            path='/login'
+            element={
+              <LoginForm onLogin={() => setUser(auth.getCurrentUser())} />
+            }
+          />
           <Route path='/logout' element={<Logout />} />
           <Route path='/register' element={<RegisterForm />} />
           <Route

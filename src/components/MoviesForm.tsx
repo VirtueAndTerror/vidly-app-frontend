@@ -1,10 +1,10 @@
 import Joi from 'joi';
-import { useParams, useNavigate } from 'react-router-dom';
-import Form, { FormState } from './common/Form';
-import { saveMovie, getMovie } from '../services/movieService';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import useForm from '../hooks/useFrom';
 import { getGenres } from '../services/genreService';
+import { getMovie, saveMovie } from '../services/movieService';
 import { Genre, Movie } from '../types';
-import axios from 'axios';
 
 // Shape of this form's data fields
 interface FormData {
@@ -15,120 +15,144 @@ interface FormData {
   dailyRentalRate: string;
 }
 
-interface MoviesFormState extends FormState<FormData> {
-  genres: Genre[];
-}
-// Props injected by the wrapper
-interface InjectedProps {
-  match: { params: Record<string, string | undefined> };
-  history: {
-    push: (path: string) => void;
-    replace: (path: string) => void;
-  };
-}
+const schema: Record<string, Joi.Schema> = {
+  title: Joi.string().required().label('Title'),
+  genreId: Joi.string().required().label('Genre'),
+  numberInStock: Joi.number()
+    .integer()
+    .min(0)
+    .max(100)
+    .required()
+    .label('Number in Stock'),
+  dailyRentalRate: Joi.number()
+    .required()
+    .min(0)
+    .max(10)
+    .label('Daily Rental Rate'),
+};
 
-class MoviesForm extends Form<FormData, MoviesFormState> {
-  state: MoviesFormState = {
-    data: {
-      title: '',
-      genreId: '',
-      numberInStock: '',
-      dailyRentalRate: '',
-    },
-    genres: [] as Genre[],
-    errors: {},
-  };
-  constructor(props: InjectedProps) {
-    super(props);
-  }
+const mapToViewModel = (movie: Movie): FormData => ({
+  _id: movie._id,
+  title: movie.title,
+  genreId: movie.genre._id,
+  numberInStock: String(movie.numberInStock),
+  dailyRentalRate: String(movie.dailyRentalRate),
+});
 
-  schema: Record<string, Joi.Schema> = {
-    title: Joi.string().required().label('Title'),
-    genreId: Joi.string().required().label('Genre'),
-    numberInStock: Joi.number()
-      .integer()
-      .min(0)
-      .max(100)
-      .required()
-      .label('Number in Stock'),
-    dailyRentalRate: Joi.number()
-      .required()
-      .min(0)
-      .max(10)
-      .label('Daily Rental Rate'),
-  };
-
-  async populateGenres() {
-    const { data: genres } = await getGenres();
-    this.setState({ genres });
-  }
-
-  async populateMovie() {
-    try {
-      const movieId = this.props.match.params.id || '';
-      if (movieId === 'new') return;
-
-      const { data: movie } = await getMovie(movieId);
-      this.setState({ data: this.mapToViewModel(movie) });
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response && err.response.status === 404)
-        this.props.history.replace('/not-found');
-    }
-  }
-
-  async componentDidMount() {
-    await this.populateGenres();
-    await this.populateMovie();
-  }
-
-  mapToViewModel(movie: Movie): FormData {
-    return {
-      _id: movie._id,
-      title: movie.title,
-      genreId: movie.genre._id,
-      numberInStock: movie.numberInStock.toString(),
-      dailyRentalRate: movie.dailyRentalRate.toString(),
-    };
-  }
-
-  doSubmit = async (): Promise<void> => {
-    //Call the server
-    const { data } = this.state;
-    await saveMovie({
-      ...data,
-      numberInStock: Number(data.numberInStock),
-      dailyRentalRate: Number(data.dailyRentalRate),
-    }as any);
-    this.props.history.push('/movies');
-  };
-
-  render() {
-    return (
-      <div>
-        <h1>Movie Form</h1>
-        <form onSubmit={this.handleSubmit}>
-          {this.renderInput('title', 'Title')}
-          {this.renderSelect('genreId', 'Genre', this.state.genres)}
-          {this.renderInput('numberInStock', 'Number in Stock', 'number')}
-          {this.renderInput('dailyRentalRate', 'Rate', 'number')}
-          {this.renderButton('Save')}
-        </form>
-      </div>
-    );
-  }
-}
-
-// Wrapper injects v6 hooks as props the class component already expects
-function MoviesFormWrapper(props: object) {
-  const params = useParams();
+const MoviesForm = () => {
+  const { id = '' } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  return (
-    <MoviesForm
-      {...props}
-      match={{ params }}
-      history={{ push: navigate, replace: navigate }}
-    />
-  );
-}
 
-export default MoviesFormWrapper;
+  const [genres, setGenres] = useState<Genre[]>([]);
+
+  const { data, setData, errors, validate, handleSubmit, handleChange } =
+    useForm<FormData>(
+      { title: '', genreId: '', numberInStock: '', dailyRentalRate: '' },
+      schema,
+      async () => {
+        await saveMovie({
+          ...data,
+          numberInStock: Number(data.numberInStock),
+          dailyRentalRate: Number(data.dailyRentalRate),
+        });
+        navigate('/movies');
+      },
+    );
+
+  useEffect(() => {
+    async function fetchData() {
+      const { data: genres } = await getGenres();
+      setGenres(genres);
+
+      if (id === 'new') return;
+
+      try {
+        const { data: movie } = await getMovie(id);
+        setData(mapToViewModel(movie));
+      } catch (err: any) {
+        if (err.response && err.response.status === 404)
+          navigate('/not-found', { replace: true });
+      }
+    }
+    fetchData();
+  }, []);
+
+  return (
+    <div>
+      <h1>Movie Form</h1>
+      <form onSubmit={handleSubmit}>
+        <div className='form-group'>
+          <label htmlFor='title'>Title</label>
+          <input
+            id='title'
+            name='title'
+            type='text'
+            value={data.title}
+            onChange={handleChange}
+            className='form-control'
+          />
+          {errors.title && (
+            <div className='alert alert-danger'>{errors.title}</div>
+          )}
+        </div>
+
+        <div className='form-group'>
+          <label htmlFor='genreId'>Genre</label>
+          <select
+            id='genreId'
+            name='genreId'
+            value={data.genreId}
+            onChange={handleChange as any}
+            className='form-control'
+          >
+            <option value='' />
+            {genres.map((genre) => (
+              <option key={genre._id} value={genre._id}>
+                {genre.name}
+              </option>
+            ))}
+          </select>
+          {errors.genreId && (
+            <div className='alert alert-danger'>{errors.genreId}</div>
+          )}
+        </div>
+
+        <div className='form-group'>
+          <label htmlFor='numberInStock'>Number in Stock</label>
+          <input
+            id='numberInStock'
+            name='numberInStock'
+            type='number'
+            value={data.numberInStock}
+            onChange={handleChange}
+            className='form-control'
+          />
+          {errors.numberInStock && (
+            <div className='alert alert-danger'>{errors.numberInStock}</div>
+          )}
+        </div>
+
+        <div className='form-group'>
+          <label htmlFor='dailyRentalRate'>Rate</label>
+          <input
+            id='dailyRentalRate'
+            name='dailyRentalRate'
+            type='number'
+            value={data.dailyRentalRate}
+            onChange={handleChange}
+            className='form-control'
+          />
+          {errors.dailyRentalRate && (
+            <div className='alert alert-danger'>{errors.dailyRentalRate}</div>
+          )}
+        </div>
+
+        <button disabled={!!validate()} className='btn btn-primary'>
+          Save
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default MoviesForm;

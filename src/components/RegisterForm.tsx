@@ -1,5 +1,6 @@
 import Joi from 'joi';
-import Form, { FormState } from './common/Form';
+import useForm from '../hooks/useFrom';
+import { useNavigate } from 'react-router-dom';
 import * as userService from '../services/userService';
 import auth from '../services/authService';
 
@@ -9,54 +10,90 @@ interface FormData {
   name: string;
 }
 
-class RegisterForm extends Form<FormData, FormState<FormData>> {
-  constructor(props: object) {
-    super(props);
+const schema: Record<string, Joi.Schema> = {
+  username: Joi.string()
+    .email({ tlds: { allow: false } })
+    .required()
+    .label('Username'),
+  password: Joi.string().min(5).required().label('Password'),
+  name: Joi.string().required().label('Name'),
+};
 
-    this.state = {
-      data: { username: '', password: '', name: '' },
-      errors: {},
-    };
-  }
+const RegisterForm = () => {
+  const navigate = useNavigate();
 
-  schema: Record<string, Joi.Schema> = {
-    username: Joi.string()
-      .email({ tlds: { allow: false } })
-      .required()
-      .label('Username'),
-    password: Joi.string().min(5).required().label('Password'),
-    name: Joi.string().required().label('Name'),
-  };
-
-  doSubmit = async (): Promise<void> => {
-    try {
-      const res = await userService.register(this.state.data);
-
-      auth.loginWithJwt(res.headers['x-auth-token']);
-
-      window.location.href = '/';
-    } catch (err: any) {
-      if (err.response && err.response.status === 400) {
-        const errors = { ...this.state.errors };
-        errors.username = err.response.data;
-        this.setState({ errors });
-      }
-    }
-  };
-
-  render() {
-    return (
-      <div>
-        <h1>Register</h1>
-        <form onSubmit={this.handleSubmit}>
-          {this.renderInput('username', 'Username')}
-          {this.renderInput('password', 'Password', 'password')}
-          {this.renderInput('name', 'Name')}
-          {this.renderButton('Register')}
-        </form>
-      </div>
+  const { data, errors, setErrors, validate, handleSubmit, handleChange } =
+    useForm<FormData>(
+      { username: '', password: '', name: '' },
+      schema,
+      async () => {
+        try {
+          const res = await userService.register(data);
+          auth.loginWithJwt(res.headers['x-auth-token']);
+          navigate('/login');
+        } catch (error: any) {
+          if (error.response && error.response.status === 400) {
+            setErrors({ ...errors, username: error.response.data });
+          }
+        }
+      },
     );
-  }
-}
+
+  return (
+    <div>
+      <h1>Register</h1>
+      <form onSubmit={handleSubmit}>
+        <div className='form-group'>
+          <label htmlFor='username'>Username</label>
+          <input
+            id='username'
+            name='username'
+            type='text'
+            value={data.username}
+            onChange={handleChange}
+            className='form-control'
+          />
+          {errors.username && (
+            <div className='alert alert-danger'>{errors.username}</div>
+          )}
+        </div>
+
+        <div className='form-group'>
+          <label htmlFor='password'>Password</label>
+          <input
+            id='password'
+            name='password'
+            type='password'
+            value={data.password}
+            onChange={handleChange}
+            className='form-control'
+          />
+          {errors.password && (
+            <div className='alert alert-danger'>{errors.password}</div>
+          )}
+        </div>
+
+        <div className='form-group'>
+          <label htmlFor='name'>Name</label>
+          <input
+            id='name'
+            name='name'
+            type='text'
+            value={data.name}
+            onChange={handleChange}
+            className='form-control'
+          />
+          {errors.name && (
+            <div className='alert alert-danger'>{errors.name}</div>
+          )}
+        </div>
+
+        <button disabled={!!validate()} className='btn btn-primary'>
+          Register
+        </button>
+      </form>
+    </div>
+  );
+};
 
 export default RegisterForm;

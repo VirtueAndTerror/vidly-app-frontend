@@ -62,6 +62,7 @@ const useForm = <T extends Record<string, any>>(
     data,
     setData,
     errors,
+    setErrors,
     validate,
     handleChange,
     handleSubmit,

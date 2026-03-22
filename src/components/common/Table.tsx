@@ -14,13 +14,13 @@ const Table = <T extends { _id: string }>({
   sortColumn,
   onSort,
   data,
-}: Props<T>) => {
-  return (
-    <table className='table'>
-      <TableHeader columns={columns} sortColumn={sortColumn} onSort={onSort} />
-      <TableBody data={data} columns={columns} />
-    </table>
-  );
-};
+}: Props<T>) =>
+(
+  <table className='table'>
+    <TableHeader columns={columns} sortColumn={sortColumn} onSort={onSort} />
+    <TableBody data={data} columns={columns} />
+  </table>
+);
+
 
 export default Table;

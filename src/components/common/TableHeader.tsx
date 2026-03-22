@@ -1,4 +1,4 @@
-import { Component } from 'react';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import { Column, SortColumn } from '../../types';
@@ -9,50 +9,45 @@ interface Props<T> {
   onSort: (sortColumn: SortColumn) => void;
 }
 
-class TableHeader<T> extends Component<Props<T>> {
-  raiseSort = (path: string | undefined): void => {
+const TableHeader = <T,>({ columns, sortColumn, onSort }: Props<T>) => {
+  const raiseSort = (path: string | undefined): void => {
     if (!path) return;
-    const sortColumn = { ...this.props.sortColumn };
+    const newSortComumn = { ...sortColumn };
 
-    if (sortColumn.path === path) {
-      sortColumn.order = sortColumn.order === 'asc' ? 'desc' : 'asc';
+    if (newSortComumn.path === path) {
+      newSortComumn.order = newSortComumn.order === 'asc' ? 'desc' : 'asc';
     } else {
-      sortColumn.path = path;
-      sortColumn.order = 'asc';
+      newSortComumn.path = path;
+      newSortComumn.order = 'asc' as const;
     }
-    this.props.onSort(sortColumn);
+    onSort(newSortComumn);
   };
 
-  renderSortIcon = (column: Column<T>) => {
-    const { sortColumn } = this.props;
-
+  const renderSortIcon = (column: Column<T>) => {
     const sortUp = <FontAwesomeIcon icon={faSortUp} />;
     const sortDown = <FontAwesomeIcon icon={faSortDown} />;
 
     if (column.path !== sortColumn.path) return null;
-    if (sortColumn.order === 'asc') return sortUp;
-    else {
-      return sortDown;
-    }
+
+    return (sortColumn.order === 'asc') ? sortUp : sortDown;
   };
 
-  render() {
-    return (
-      <thead>
-        <tr>
-          {this.props.columns.map((column) => (
-            <th
-              className='clickable'
-              key={column.path || column.key}
-              onClick={() => this.raiseSort(column.path)}
-            >
-              {column.label} {this.renderSortIcon(column)}
-            </th>
-          ))}
-        </tr>
-      </thead>
-    );
-  }
+  return (
+    <thead>
+      <tr>
+        {columns.map((column) => (
+          <th
+            className='clickable'
+            key={column.path || column.key}
+            onClick={() => raiseSort(column.path)}
+          >
+            {column.label} {renderSortIcon(column)}
+          </th>
+        ))}
+      </tr>
+    </thead>
+  );
+
 }
 
 export default TableHeader;
